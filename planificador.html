@@ -10,6 +10,7 @@
     --text:#e7edf5; --muted:#8695a7; --accent:#5fb3ff;
     --ing:#5fb3ff; --ing-bg:rgba(95,179,255,0.16);
     --tec:#c792ea; --tec-bg:rgba(199,146,234,0.18);
+    --hom:#3ecf8e; --hom-bg:rgba(62,207,142,0.16);
     --ok:#3ecf8e; --warn:#f5b942; --danger:#ff6b6b; --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -43,6 +44,7 @@
   .badge{ font-size:0.65rem; padding:2px 8px; border-radius:999px; font-weight:600; }
   .badge.ing{ background:var(--ing-bg); color:var(--ing); }
   .badge.tec{ background:var(--tec-bg); color:var(--tec); }
+  .badge.hom{ background:var(--hom-bg); color:var(--hom); }
   .comision{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
     background:var(--panel2); margin-bottom:6px; font-size:0.78rem; flex-wrap:wrap; }
   .comision label{ display:flex; align-items:center; gap:6px; cursor:pointer; flex:1; min-width:200px; }
@@ -76,6 +78,7 @@
     line-height:1.2; overflow:hidden; }
   .block.ing{ background:var(--ing-bg); border-left:3px solid var(--ing); color:#dbeeff; }
   .block.tec{ background:var(--tec-bg); border-left:3px solid var(--tec); color:#f1e3fb; }
+  .block.hom{ background:var(--hom-bg); border-left:3px solid var(--hom); color:#d9fbe9; }
   .block.priority{ box-shadow:0 0 0 1px var(--warn) inset; }
   .block .name{ font-weight:600; display:block; }
 
@@ -106,6 +109,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="grilla">📅 Grilla semanal</div>
   <div class="tab" data-tab="ingenieria">🔵 Oferta Ingeniería</div>
+  <div class="tab" data-tab="homogeneas">🟢 Homogéneas (Mate/Física)</div>
   <div class="tab" data-tab="tecnicatura">🟣 Tecnicatura</div>
 </div>
 
@@ -119,6 +123,7 @@
   <div class="legend">
     <span><i class="dot" style="background:var(--ing)"></i> Ingeniería en Sistemas</span>
     <span><i class="dot" style="background:var(--tec)"></i> Tecnicatura Ciencia de Datos e IA</span>
+    <span><i class="dot" style="background:var(--hom)"></i> Homogéneas (Matemática/Física)</span>
     <span><i class="dot" style="background:var(--warn)"></i> Marcada como prioridad</span>
   </div>
   <div class="grid-wrap">
@@ -135,6 +140,17 @@
     marcala con el botón "★ Prioridad".
   </div>
   <div id="ingContainer"></div>
+</div>
+
+<!-- ===================== HOMOGÉNEAS ===================== -->
+<div class="section" id="tab-homogeneas">
+  <div class="disclaimer">
+    Catálogo extraído de <b>Horario_UDB_Matemática_2C_2026.xlsx</b>, <b>Horario_UDB_FISICA_2C_2026.xls</b> y
+    <b>Horario_UDB_LEG_y_ECONOMIA_2C_2026.xlsx</b> (solo Economía — Legislación quedó afuera porque ya la aprobaste).
+    Estas son las materias homogéneas (UDB Matemática, Física y Economía/Legislación) que comparte Ingeniería en Sistemas
+    con otras carreras. Tildá las comisiones que te interesan igual que en la oferta de Ingeniería.
+  </div>
+  <div id="homContainer"></div>
 </div>
 
 <!-- ===================== TECNICATURA ===================== -->
@@ -157,6 +173,8 @@
    DATOS
    ============================================================ */
 const ING_CATALOG = {"Sistemas Operativos":[{"div":"K3521","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[1,2,3,4,5,6],"texto":[]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[],"texto":["SABADOS DE 7:45 A 14 HS"]},"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3524","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[1,2,3,4,5,6],"texto":[]},"Viernes":{"modulos":[4,5],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[],"texto":["SABADOS TARDE"]},"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3575","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[],"texto":["SABADOS 11:45 A 18 HS"]},"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3576","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[2,3],"texto":[]}}}],"Gestion De Datos":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Martes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Miercoles":{"modulos":[2,3,4,5,6],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"P75","dias":{"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[3,4,5],"texto":[]}}}],"Bases De Datos":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Martes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Miercoles":{"modulos":[2,3,4,5,6],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"P75","dias":{"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[3,4,5],"texto":[]}}}],"Analisis Numerico":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Sabado":{"modulos":[1,2,3,4,5,6],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3575","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Desarrollo De Software":[{"div":"K3511","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[1,2,3,4,5],"texto":[]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3551","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3552","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3553","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}}],"Redes De Informacion":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[2,3],"texto":[]},"Martes":{"modulos":[2,3,4,5],"texto":[]}}},{"div":"K4522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[2,3,4,5],"texto":[]},"Miercoles":{"modulos":[3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3],"texto":[]},"Viernes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[1,2,3],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[1,2,3],"texto":[]},"Viernes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2],"texto":[]},"Jueves":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4575","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3],"texto":[]},"Jueves":{"modulos":[1,2,3,4,5],"texto":[]}}}],"Comunicacion De Datos":[{"div":"K3571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3],"texto":[]},"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[1,2,3],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Viernes":{"modulos":[1,2,3],"texto":[]}}}],"Investigación Operativa":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K4523","turno":"Mañana","sede":"MEDRANO","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1],"texto":[]}}}],"Simulacion":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":null,"turno":"Tarde","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Tecnologías Para La Automatización":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Sabado":{"modulos":[1,2,3,4,5,6],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4575","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Ingenieria De Software":[{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Habilitacion Profesional":[{"div":"K4511","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE 1-2 (*)"]},"Sabado":{"modulos":[1,2],"texto":[]}}}],"Seminario Integrador":[{"div":"K4551","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE 1-2 (*)"]},"Sabado":{"modulos":[1,2],"texto":[]}}}],"Ciencia De Datos":[{"div":"K4571","turno":"Noche","sede":"P75","modalidad":"MEDRANO","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"P75","modalidad":"MEDRANO","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Sistemas De Gestion":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[1,2,3,4],"texto":[]},"Jueves":{"modulos":[1,2,3,4],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Martes":{"modulos":[1,2,3,4],"texto":[]},"Viernes":{"modulos":[1,2,3,4],"texto":[]}}}],"Inteligencia Artificial":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[1,2,3,4],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[1,2,3,4],"texto":[]}}}],"Administracion Gerencial":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}}]};
+
+const HOM_CATALOG = {"Álgebra Y Geometría Analítica": [{"div": "Z1522", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1523", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1524", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1545", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1546", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1547", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1572", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1573", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}], "Analisis Matematico I": [{"div": "Z1521", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1522", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1523", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1524", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1545", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1546", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1571", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Sabado": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1572", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1573", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1574", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}], "Analisis Matematico II": [{"div": "Z2521", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Sabado": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2522", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2525", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2523", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2526", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2527", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2545", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2548", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2547", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2571", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2576", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2574", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2575", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Sabado": {"modulos": [1, 2, 3, 4, 5]}}}], "Probabilidad Y Estadística": [{"div": "Z2521", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2522", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2523", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Sabado": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2524", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Jueves": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2525", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2527", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2526", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Viernes": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z2544", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2545", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Viernes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2546", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2548", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2547", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Miercoles": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2571", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Jueves": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2575", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Jueves": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2572", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Miercoles": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2576", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2573", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2577", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z2574", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [0, 1, 2, 3, 4, 5]}}}], "Fisica I": [{"div": "Z1521", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1522", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1523", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1524", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1541", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1542", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1543", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1571", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1572", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z1573", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}], "Fisica II": [{"div": "Z2521", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2522", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2523", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2524", "turno": "Mañana", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2541", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2599", "turno": "Tarde", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2542", "turno": "Tarde", "sede": "CAMPUS", "modalidad": "P", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2571", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2572", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Jueves": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2573", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2574", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P", "dias": {"Martes": {"modulos": [1, 2, 3, 4, 5]}, "Viernes": {"modulos": [1, 2, 3, 4, 5]}}}, {"div": "Z2575", "turno": "Noche", "sede": "VIRTUAL", "modalidad": "DP", "dias": {"Lunes": {"modulos": [1, 2, 3, 4, 5]}, "Miercoles": {"modulos": [1, 2, 3, 4, 5]}}}], "Economía": [{"div": "Z3521", "turno": "Mañana", "sede": "MEDRANO", "modalidad": "P50", "dias": {"Viernes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z3522", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P50", "dias": {"Miercoles": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z3542", "turno": "Tarde", "sede": "MEDRANO", "modalidad": "P50", "dias": {"Jueves": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z3571", "turno": "Mañana", "sede": "CAMPUS", "modalidad": "P50", "dias": {"Sabado": {"modulos": [1, 2, 3, 4, 5, 6]}}}, {"div": "Z3573", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P50", "dias": {"Viernes": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z3574", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P50", "dias": {"Miercoles": {"modulos": [0, 1, 2, 3, 4, 5]}}}, {"div": "Z3575", "turno": "Noche", "sede": "CAMPUS", "modalidad": "P50", "dias": {"Lunes": {"modulos": [0, 1, 2, 3, 4, 5]}}}]};
 
 const TEC_CURRICULA = [
   {n:1, materias:["Administración y Gestión de Base de Datos","Elementos de Análisis Matemático","Lógica Computacional","Técnicas de Programación"], done:true},
@@ -183,6 +201,7 @@ for(let h=7; h<=24; h++){ HOURS.push(h % 24); }
    ESTADO (localStorage)
    ============================================================ */
 const LS_ING = "planificador_ing_seleccion";
+const LS_HOM = "planificador_hom_seleccion";
 const LS_TEC_PROGRESS = "planificador_tec_progreso";
 const LS_TEC_MANUAL = "planificador_tec_horario_manual";
 
@@ -195,13 +214,14 @@ function save(key, val){
 }
 
 let ingSelection = load(LS_ING, {}); // { "Materia||div": {checked:bool, priority:bool} }
+let homSelection = load(LS_HOM, {}); // { "Materia||div": {checked:bool, priority:bool} }
 let tecProgress = load(LS_TEC_PROGRESS, {}); // { "materia": true }
 let tecManual = load(LS_TEC_MANUAL, []); // [{materia, dia, inicio, fin, id}]
 
 function resetAll(){
   if(confirm("¿Reiniciar toda tu selección de horarios y progreso? No se puede deshacer.")){
-    ingSelection = {}; tecProgress = {}; tecManual = [];
-    save(LS_ING, ingSelection); save(LS_TEC_PROGRESS, tecProgress); save(LS_TEC_MANUAL, tecManual);
+    ingSelection = {}; homSelection = {}; tecProgress = {}; tecManual = [];
+    save(LS_ING, ingSelection); save(LS_HOM, homSelection); save(LS_TEC_PROGRESS, tecProgress); save(LS_TEC_MANUAL, tecManual);
     renderAll();
   }
 }
@@ -221,26 +241,26 @@ document.querySelectorAll(".tab").forEach(t=>{
 /* ============================================================
    RENDER: Catálogo Ingeniería
    ============================================================ */
-function renderIngenieria(){
-  const container = document.getElementById("ingContainer");
+function renderCatalogGeneric(containerId, catalog, selection, lsKey, badgeLabel, badgeClass, rerenderFn){
+  const container = document.getElementById(containerId);
   container.innerHTML = "";
-  Object.entries(ING_CATALOG).forEach(([materia, comisiones])=>{
+  Object.entries(catalog).forEach(([materia, comisiones])=>{
     const card = document.createElement("div");
     card.className = "subject-card";
-    let html = `<h3><span class="badge ing">ING</span> ${materia}</h3>`;
+    let html = `<h3><span class="badge ${badgeClass}">${badgeLabel}</span> ${materia}</h3>`;
     comisiones.forEach((com, idx)=>{
       const key = materia + "||" + (com.div || ("turno-"+com.turno+"-"+idx));
-      const state = ingSelection[key] || {checked:false, priority:false};
+      const state = selection[key] || {checked:false, priority:false};
       const diasStr = Object.entries(com.dias).map(([d, info])=>{
         let parts = [];
-        if(info.modulos.length) parts.push(`mód ${info.modulos.join(",")}`);
-        if(info.texto.length) parts.push(info.texto.join("; "));
+        if(info.modulos && info.modulos.length) parts.push(`mód ${info.modulos.join(",")}`);
+        if(info.texto && info.texto.length) parts.push(info.texto.join("; "));
         return `${DAY_LABELS[d]||d} (${parts.join(" · ")})`;
       }).join(" | ");
       html += `
         <div class="comision ${state.checked?'checked':''}">
           <label>
-            <input type="checkbox" data-key="${key}" class="ing-check" ${state.checked?'checked':''}>
+            <input type="checkbox" data-key="${key}" class="cat-check" ${state.checked?'checked':''}>
             <span><b>${com.div||com.turno}</b> · ${com.turno} · ${com.sede} (${com.modalidad})<br>
             <span class="meta">${diasStr || "sin días detectados"}</span></span>
           </label>
@@ -251,24 +271,32 @@ function renderIngenieria(){
     container.appendChild(card);
   });
 
-  container.querySelectorAll(".ing-check").forEach(cb=>{
+  container.querySelectorAll(".cat-check").forEach(cb=>{
     cb.addEventListener("change", ()=>{
       const key = cb.dataset.key;
-      ingSelection[key] = ingSelection[key] || {checked:false, priority:false};
-      ingSelection[key].checked = cb.checked;
-      save(LS_ING, ingSelection);
-      renderIngenieria(); renderGrid();
+      selection[key] = selection[key] || {checked:false, priority:false};
+      selection[key].checked = cb.checked;
+      save(lsKey, selection);
+      rerenderFn(); renderGrid();
     });
   });
   container.querySelectorAll(".prio-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const key = btn.dataset.key;
-      ingSelection[key] = ingSelection[key] || {checked:false, priority:false};
-      ingSelection[key].priority = !ingSelection[key].priority;
-      save(LS_ING, ingSelection);
-      renderIngenieria(); renderGrid();
+      selection[key] = selection[key] || {checked:false, priority:false};
+      selection[key].priority = !selection[key].priority;
+      save(lsKey, selection);
+      rerenderFn(); renderGrid();
     });
   });
+}
+
+function renderIngenieria(){
+  renderCatalogGeneric("ingContainer", ING_CATALOG, ingSelection, LS_ING, "ING", "ing", renderIngenieria);
+}
+
+function renderHomogeneas(){
+  renderCatalogGeneric("homContainer", HOM_CATALOG, homSelection, LS_HOM, "HOM", "hom", renderHomogeneas);
 }
 
 /* ============================================================
@@ -390,6 +418,36 @@ function collectBlocks(){
     });
   });
 
+  const keyToComHom = {};
+  Object.entries(HOM_CATALOG).forEach(([materia, comisiones])=>{
+    comisiones.forEach((com, idx)=>{
+      const key = materia + "||" + (com.div || ("turno-"+com.turno+"-"+idx));
+      keyToComHom[key] = {materia, com};
+    });
+  });
+
+  Object.entries(homSelection).forEach(([key, state])=>{
+    if(!state.checked) return;
+    const entry = keyToComHom[key];
+    if(!entry) return;
+    const {materia, com} = entry;
+    Object.entries(com.dias).forEach(([dia, info])=>{
+      if(!info.modulos || info.modulos.length === 0) return;
+      const mods = info.modulos.slice().sort((a,b)=>a-b);
+      let start = mods[0], prev = mods[0];
+      for(let i=1;i<=mods.length;i++){
+        const cur = mods[i];
+        if(cur !== prev+1){
+          const startHour = moduloToHour(com.turno, start);
+          const endHour = moduloToHour(com.turno, prev) + 1;
+          blocks.push({materia, carrera:"hom", dia, startHour, endHour: endHour===0?24:endHour, priority: state.priority, meta: `${com.div||com.turno} · ${com.turno}`});
+          start = cur;
+        }
+        prev = cur;
+      }
+    });
+  });
+
   tecManual.forEach(item=>{
     blocks.push({materia:item.materia, carrera:"tec", dia:item.dia, startHour:item.inicio, endHour:item.fin, priority:false, meta:"manual"});
   });
@@ -433,6 +491,7 @@ function renderGrid(){
    ============================================================ */
 function renderAll(){
   renderIngenieria();
+  renderHomogeneas();
   renderTecnicatura();
   renderGrid();
 }
