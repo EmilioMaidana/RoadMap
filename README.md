@@ -2,7 +2,7 @@
 
 Roadmap interactivo para trackear mi progreso en la carrera, plan 2023, con lógica de correlativas incluida (bloqueo/desbloqueo automático de materias según lo que tengo cursado y aprobado).
 
-[![Ver Roadmap](https://img.shields.io/badge/Roadmap-Ver%20progreso-5fb3ff?style=for-the-badge)](https://emiliomaidana.github.io/roadmap/)
+[![Ver Roadmap](https://img.shields.io/badge/Roadmap-Ver%20progreso-5fb3ff?style=for-the-badge)](https://emiliomaidana.github.io/RoadMap/)
 
 > Reemplazá `TUUSUARIO` y `TUREPO` por tu usuario y nombre de repo reales una vez que lo subas.
 
