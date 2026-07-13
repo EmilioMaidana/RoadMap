@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planificador de Cursada · 2C 2026</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d29; --border:#243040;
+    --text:#e7edf5; --muted:#8695a7; --accent:#5fb3ff;
+    --ing:#5fb3ff; --ing-bg:rgba(95,179,255,0.16);
+    --tec:#c792ea; --tec-bg:rgba(199,146,234,0.18);
+    --ok:#3ecf8e; --warn:#f5b942; --danger:#ff6b6b; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at 15% 0%, #14202e 0%, transparent 45%),
+      radial-gradient(circle at 85% 10%, #1f1a2e 0%, transparent 40%), var(--bg);
+    color:var(--text); min-height:100vh; padding-bottom:60px;
+  }
+  header{ padding:32px 24px 16px; text-align:center; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(95,179,255,0.08), transparent); }
+  header h1{ margin:0 0 6px; font-size:1.6rem; letter-spacing:-0.02em; }
+  header p{ margin:0; color:var(--muted); font-size:0.92rem; }
+  .tabs{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:20px 24px 0; }
+  .tab{ padding:9px 18px; border-radius:999px; border:1px solid var(--border); background:var(--panel);
+    color:var(--muted); font-size:0.85rem; cursor:pointer; user-select:none; }
+  .tab.active{ background:var(--accent); color:#0b0f14; font-weight:600; border-color:var(--accent); }
+  .section{ max-width:1300px; margin:24px auto 0; padding:0 24px; display:none; }
+  .section.active{ display:block; }
+
+  .disclaimer{ background:var(--panel); border:1px solid var(--warn); border-radius:10px;
+    padding:12px 16px; font-size:0.8rem; color:var(--muted); margin-bottom:20px; }
+  .disclaimer b{ color:var(--warn); }
+
+  h2.section-title{ font-size:1.05rem; margin:28px 0 12px; color:var(--accent); }
+
+  /* ---- Catálogo ---- */
+  .subject-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:14px; }
+  .subject-card h3{ margin:0 0 10px; font-size:0.95rem; display:flex; align-items:center; gap:8px; }
+  .badge{ font-size:0.65rem; padding:2px 8px; border-radius:999px; font-weight:600; }
+  .badge.ing{ background:var(--ing-bg); color:var(--ing); }
+  .badge.tec{ background:var(--tec-bg); color:var(--tec); }
+  .comision{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
+    background:var(--panel2); margin-bottom:6px; font-size:0.78rem; flex-wrap:wrap; }
+  .comision label{ display:flex; align-items:center; gap:6px; cursor:pointer; flex:1; min-width:200px; }
+  .comision .meta{ color:var(--muted); }
+  .comision .prio-btn{ font-size:0.68rem; padding:4px 8px; border-radius:6px; border:1px solid var(--border);
+    background:transparent; color:var(--muted); cursor:pointer; }
+  .comision .prio-btn.active{ background:var(--warn); color:#0b0f14; border-color:var(--warn); font-weight:600; }
+  .comision.checked{ border:1px solid var(--accent); }
+
+  /* ---- Manual add ---- */
+  .manual-form{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .manual-form select, .manual-form input{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:6px; padding:6px 8px; font-size:0.78rem;
+  }
+  .manual-form button{ background:var(--tec); color:#0b0f14; border:none; border-radius:6px;
+    padding:7px 14px; font-size:0.78rem; font-weight:600; cursor:pointer; }
+  .manual-list{ margin-top:8px; font-size:0.78rem; color:var(--muted); }
+  .manual-list .item{ display:flex; justify-content:space-between; padding:5px 8px; background:var(--panel2);
+    border-radius:6px; margin-bottom:4px; }
+  .manual-list button{ background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.75rem; }
+
+  /* ---- Grilla ---- */
+  .grid-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); }
+  table.grid{ border-collapse:collapse; width:100%; min-width:820px; }
+  table.grid th, table.grid td{ border:1px solid var(--border); text-align:center; font-size:0.72rem; }
+  table.grid th{ background:var(--panel2); padding:8px 4px; color:var(--muted); position:sticky; top:0; }
+  table.grid td.hourcell{ background:var(--panel2); color:var(--muted); padding:6px 4px; white-space:nowrap; width:56px; }
+  table.grid td.slot{ height:44px; padding:2px; vertical-align:top; position:relative; }
+  .block{ font-size:0.62rem; border-radius:5px; padding:3px 4px; margin-bottom:2px; text-align:left;
+    line-height:1.2; overflow:hidden; }
+  .block.ing{ background:var(--ing-bg); border-left:3px solid var(--ing); color:#dbeeff; }
+  .block.tec{ background:var(--tec-bg); border-left:3px solid var(--tec); color:#f1e3fb; }
+  .block.priority{ box-shadow:0 0 0 1px var(--warn) inset; }
+  .block .name{ font-weight:600; display:block; }
+
+  .legend{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin:14px 0 20px; font-size:0.75rem; color:var(--muted); }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .dot{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  /* ---- Tecnicatura progreso ---- */
+  .tec-level{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:12px; }
+  .tec-level h3{ margin:0 0 10px; font-size:0.9rem; color:var(--tec); }
+  .tec-item{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; font-size:0.82rem; }
+  .tec-item.done{ color:var(--ok); }
+  .tec-item.pending{ background:var(--tec-bg); }
+  footer{ text-align:center; color:var(--muted); font-size:0.78rem; margin-top:40px; padding:0 24px; }
+  .reset-btn{ display:block; margin:24px auto 0; background:none; border:1px solid var(--border); color:var(--muted);
+    padding:8px 16px; border-radius:8px; font-size:0.78rem; cursor:pointer; }
+  .reset-btn:hover{ border-color:var(--danger); color:var(--danger); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗓️ Planificador de Cursada — 2° Cuatrimestre 2026</h1>
+  <p>Ingeniería en Sistemas de Información (UTN FRBA) + Tecnicatura en Ciencia de Datos e IA</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="grilla">📅 Grilla semanal</div>
+  <div class="tab" data-tab="ingenieria">🔵 Oferta Ingeniería</div>
+  <div class="tab" data-tab="tecnicatura">🟣 Tecnicatura</div>
+</div>
+
+<!-- ===================== GRILLA ===================== -->
+<div class="section active" id="tab-grilla">
+  <div class="disclaimer">
+    <b>⚠️ Horarios aproximados.</b> Los módulos horarios de la planilla de UTN no traen el horario de reloj exacto,
+    así que estimé cada módulo como ~1 hora según el turno (Mañana desde 7:00, Tarde desde 14:00, Noche desde 18:00).
+    Usalo para detectar superposiciones y armar tu prioridad, pero confirmá el horario final en Autogestión antes de inscribirte.
+  </div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--ing)"></i> Ingeniería en Sistemas</span>
+    <span><i class="dot" style="background:var(--tec)"></i> Tecnicatura Ciencia de Datos e IA</span>
+    <span><i class="dot" style="background:var(--warn)"></i> Marcada como prioridad</span>
+  </div>
+  <div class="grid-wrap">
+    <table class="grid" id="gridTable"></table>
+  </div>
+  <button class="reset-btn" onclick="resetAll()">↺ Reiniciar toda mi selección</button>
+</div>
+
+<!-- ===================== INGENIERÍA ===================== -->
+<div class="section" id="tab-ingenieria">
+  <div class="disclaimer">
+    Catálogo extraído de <b>Horario_Ing_Sistemas_2C_2026.xlsx</b>. Tildá las comisiones que te interesan
+    para verlas reflejadas en la grilla semanal. Si una comisión te importa más que otra que se superpone,
+    marcala con el botón "★ Prioridad".
+  </div>
+  <div id="ingContainer"></div>
+</div>
+
+<!-- ===================== TECNICATURA ===================== -->
+<div class="section" id="tab-tecnicatura">
+  <h2 class="section-title">📘 Currícula — Tecnicatura Universitaria en Ciencia de Datos e IA</h2>
+  <div class="disclaimer">
+    Marcá las materias que ya tenés aprobadas. Las del <b>5° cuatrimestre</b> (las que te quedan) tienen,
+    además, un cargador de horario manual — todavía no subiste la oferta de ese cuatrimestre, así que podés
+    cargarla vos a mano apenas la tengas y va a aparecer reflejada en la grilla semanal.
+  </div>
+  <div id="tecContainer"></div>
+</div>
+
+<footer>
+  El progreso y las selecciones se guardan en tu navegador (localStorage). Hosteado con GitHub Pages.
+</footer>
+
+<script>
+/* ============================================================
+   DATOS
+   ============================================================ */
+const ING_CATALOG = {"Sistemas Operativos":[{"div":"K3521","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[1,2,3,4,5,6],"texto":[]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[],"texto":["SABADOS DE 7:45 A 14 HS"]},"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3524","turno":"Mañana","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[1,2,3,4,5,6],"texto":[]},"Viernes":{"modulos":[4,5],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[],"texto":["SABADOS TARDE"]},"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[2,3],"texto":[]}}},{"div":"K3575","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Martes":{"modulos":[],"texto":["SABADOS 11:45 A 18 HS"]},"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3576","turno":"Noche","sede":"CAMPUS","modalidad":"Presencial","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":["SABADOS TARDE"]},"Sabado":{"modulos":[2,3],"texto":[]}}}],"Gestion De Datos":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Martes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Miercoles":{"modulos":[2,3,4,5,6],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"P75","dias":{"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[3,4,5],"texto":[]}}}],"Bases De Datos":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Martes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2],"texto":[]},"Miercoles":{"modulos":[2,3,4,5,6],"texto":[]}}},{"div":"K3523","turno":"Mañana","sede":"CAMPUS","modalidad":"P75","dias":{"Sabado":{"modulos":[0,1,2,3,4,5,6],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[3,4,5],"texto":[]}}}],"Analisis Numerico":[{"div":"K3521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Sabado":{"modulos":[1,2,3,4,5,6],"texto":[]}}},{"div":"K3522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3571","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K3575","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Desarrollo De Software":[{"div":"K3511","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[1,2,3,4,5],"texto":[]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3551","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3552","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}},{"div":"K3553","turno":"Noche","sede":"CAMPUS","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS MAÑANA"]},"Sabado":{"modulos":[2,3,4],"texto":[]}}}],"Redes De Informacion":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[2,3],"texto":[]},"Martes":{"modulos":[2,3,4,5],"texto":[]}}},{"div":"K4522","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[2,3,4,5],"texto":[]},"Miercoles":{"modulos":[3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3],"texto":[]},"Viernes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[1,2,3],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[1,2,3],"texto":[]},"Viernes":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2],"texto":[]},"Jueves":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K4575","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3],"texto":[]},"Jueves":{"modulos":[1,2,3,4,5],"texto":[]}}}],"Comunicacion De Datos":[{"div":"K3571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[0,1,2],"texto":[]}}},{"div":"K3572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3],"texto":[]},"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]}}},{"div":"K3573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[1,2,3],"texto":[]}}},{"div":"K3574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[1,2,3,4,5],"texto":[]},"Viernes":{"modulos":[1,2,3],"texto":[]}}}],"Investigación Operativa":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1],"texto":[]}}},{"div":"K4523","turno":"Mañana","sede":"MEDRANO","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Miercoles":{"modulos":[],"texto":["SABADOS TARDE 0-1 (*)"]},"Sabado":{"modulos":[0,1],"texto":[]}}}],"Simulacion":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":null,"turno":"Tarde","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Tecnologías Para La Automatización":[{"div":"K4521","turno":"Mañana","sede":"MEDRANO","modalidad":"P75","dias":{"Sabado":{"modulos":[1,2,3,4,5,6],"texto":[]}}},{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4573","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4574","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Viernes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4575","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Miercoles":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Ingenieria De Software":[{"div":"K4571","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"MEDRANO","modalidad":"P75","dias":{"Martes":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Habilitacion Profesional":[{"div":"K4511","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE 1-2 (*)"]},"Sabado":{"modulos":[1,2],"texto":[]}}}],"Seminario Integrador":[{"div":"K4551","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]},"Jueves":{"modulos":[],"texto":["SABADOS TARDE 1-2 (*)"]},"Sabado":{"modulos":[1,2],"texto":[]}}}],"Ciencia De Datos":[{"div":"K4571","turno":"Noche","sede":"P75","modalidad":"MEDRANO","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K4572","turno":"Noche","sede":"P75","modalidad":"MEDRANO","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}}],"Sistemas De Gestion":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[1,2,3,4],"texto":[]},"Jueves":{"modulos":[1,2,3,4],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Martes":{"modulos":[1,2,3,4],"texto":[]},"Viernes":{"modulos":[1,2,3,4],"texto":[]}}}],"Inteligencia Artificial":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Miercoles":{"modulos":[1,2,3,4],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[1,2,3,4],"texto":[]}}}],"Administracion Gerencial":[{"div":"K5571","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Lunes":{"modulos":[0,1,2,3,4,5],"texto":[]}}},{"div":"K5572","turno":"Noche","sede":"MEDRANO","modalidad":"Presencial","dias":{"Jueves":{"modulos":[0,1,2,3,4,5],"texto":[]}}}]};
+
+const TEC_CURRICULA = [
+  {n:1, materias:["Administración y Gestión de Base de Datos","Elementos de Análisis Matemático","Lógica Computacional","Técnicas de Programación"], done:true},
+  {n:2, materias:["Aproximación al Campo Laboral","Comunicación","Desarrollo de Sistemas de Inteligencia Artificial","Estadística y Probabilidades para Gestión de Datos"], done:true},
+  {n:3, materias:["Ciencia de Datos","Gestión de Proyectos","Modelizado de Sistemas de IA","Procesamiento de Aprendizaje Automático"], done:true},
+  {n:4, materias:["Análisis y Exploración de Datos","Modelizado de Minería de Datos","Técnicas de Procesamiento del Habla","Trabajo, Tecnología y Sociedad"], done:true},
+  {n:5, materias:["Proyecto Integrador","Seminario de Actualización","Técnicas de Procesamiento Digital de Imágenes"], done:false},
+];
+
+const DAYS = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
+const DAY_LABELS = {Lunes:"Lunes",Martes:"Martes",Miercoles:"Miércoles",Jueves:"Jueves",Viernes:"Viernes",Sabado:"Sábado"};
+
+// aproximación módulo -> hora de inicio según turno
+const TURNO_START = {"Mañana":7, "Tarde":14, "Noche":18};
+function moduloToHour(turno, modulo){
+  const start = TURNO_START[turno] ?? 18;
+  return (start + modulo) % 24;
+}
+
+const HOURS = []; // 7:00 to 24:00 (00:00) covering all turnos
+for(let h=7; h<=24; h++){ HOURS.push(h % 24); }
+
+/* ============================================================
+   ESTADO (localStorage)
+   ============================================================ */
+const LS_ING = "planificador_ing_seleccion";
+const LS_TEC_PROGRESS = "planificador_tec_progreso";
+const LS_TEC_MANUAL = "planificador_tec_horario_manual";
+
+function load(key, fallback){
+  try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch(e){ return fallback; }
+}
+function save(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){ console.error(e); }
+}
+
+let ingSelection = load(LS_ING, {}); // { "Materia||div": {checked:bool, priority:bool} }
+let tecProgress = load(LS_TEC_PROGRESS, {}); // { "materia": true }
+let tecManual = load(LS_TEC_MANUAL, []); // [{materia, dia, inicio, fin, id}]
+
+function resetAll(){
+  if(confirm("¿Reiniciar toda tu selección de horarios y progreso? No se puede deshacer.")){
+    ingSelection = {}; tecProgress = {}; tecManual = [];
+    save(LS_ING, ingSelection); save(LS_TEC_PROGRESS, tecProgress); save(LS_TEC_MANUAL, tecManual);
+    renderAll();
+  }
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("tab-"+t.dataset.tab).classList.add("active");
+  });
+});
+
+/* ============================================================
+   RENDER: Catálogo Ingeniería
+   ============================================================ */
+function renderIngenieria(){
+  const container = document.getElementById("ingContainer");
+  container.innerHTML = "";
+  Object.entries(ING_CATALOG).forEach(([materia, comisiones])=>{
+    const card = document.createElement("div");
+    card.className = "subject-card";
+    let html = `<h3><span class="badge ing">ING</span> ${materia}</h3>`;
+    comisiones.forEach((com, idx)=>{
+      const key = materia + "||" + (com.div || ("turno-"+com.turno+"-"+idx));
+      const state = ingSelection[key] || {checked:false, priority:false};
+      const diasStr = Object.entries(com.dias).map(([d, info])=>{
+        let parts = [];
+        if(info.modulos.length) parts.push(`mód ${info.modulos.join(",")}`);
+        if(info.texto.length) parts.push(info.texto.join("; "));
+        return `${DAY_LABELS[d]||d} (${parts.join(" · ")})`;
+      }).join(" | ");
+      html += `
+        <div class="comision ${state.checked?'checked':''}">
+          <label>
+            <input type="checkbox" data-key="${key}" class="ing-check" ${state.checked?'checked':''}>
+            <span><b>${com.div||com.turno}</b> · ${com.turno} · ${com.sede} (${com.modalidad})<br>
+            <span class="meta">${diasStr || "sin días detectados"}</span></span>
+          </label>
+          <button class="prio-btn ${state.priority?'active':''}" data-key="${key}">★ Prioridad</button>
+        </div>`;
+    });
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll(".ing-check").forEach(cb=>{
+    cb.addEventListener("change", ()=>{
+      const key = cb.dataset.key;
+      ingSelection[key] = ingSelection[key] || {checked:false, priority:false};
+      ingSelection[key].checked = cb.checked;
+      save(LS_ING, ingSelection);
+      renderIngenieria(); renderGrid();
+    });
+  });
+  container.querySelectorAll(".prio-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.key;
+      ingSelection[key] = ingSelection[key] || {checked:false, priority:false};
+      ingSelection[key].priority = !ingSelection[key].priority;
+      save(LS_ING, ingSelection);
+      renderIngenieria(); renderGrid();
+    });
+  });
+}
+
+/* ============================================================
+   RENDER: Tecnicatura
+   ============================================================ */
+function renderTecnicatura(){
+  const container = document.getElementById("tecContainer");
+  container.innerHTML = "";
+  TEC_CURRICULA.forEach(level=>{
+    const div = document.createElement("div");
+    div.className = "tec-level";
+    let html = `<h3>${level.n}° Cuatrimestre</h3>`;
+    level.materias.forEach(m=>{
+      const done = !!tecProgress[m];
+      html += `<div class="tec-item ${done?'done':(level.n===5?'pending':'')}">
+        <input type="checkbox" class="tec-check" data-materia="${m}" ${done?'checked':''}> ${m}
+      </div>`;
+    });
+    div.innerHTML = html;
+    container.appendChild(div);
+
+    // manual schedule loader for last cuatrimestre
+    if(level.n === 5){
+      const manualBox = document.createElement("div");
+      manualBox.className = "subject-card";
+      manualBox.innerHTML = `
+        <h3><span class="badge tec">TEC</span> Cargar horario manual (aún sin oferta publicada)</h3>
+        <div class="manual-form">
+          <select id="manualMateria">
+            ${level.materias.map(m=>`<option value="${m}">${m}</option>`).join("")}
+          </select>
+          <select id="manualDia">
+            ${DAYS.map(d=>`<option value="${d}">${DAY_LABELS[d]}</option>`).join("")}
+          </select>
+          <input type="number" id="manualInicio" placeholder="Inicio (hs)" min="0" max="23" style="width:100px">
+          <input type="number" id="manualFin" placeholder="Fin (hs)" min="0" max="23" style="width:90px">
+          <button id="manualAddBtn">+ Agregar</button>
+        </div>
+        <div class="manual-list" id="manualList"></div>
+      `;
+      container.appendChild(manualBox);
+      renderManualList();
+      document.getElementById("manualAddBtn").addEventListener("click", ()=>{
+        const materia = document.getElementById("manualMateria").value;
+        const dia = document.getElementById("manualDia").value;
+        const inicio = parseInt(document.getElementById("manualInicio").value);
+        const fin = parseInt(document.getElementById("manualFin").value);
+        if(isNaN(inicio) || isNaN(fin) || fin<=inicio){ alert("Revisá el horario de inicio/fin"); return; }
+        tecManual.push({id: Date.now(), materia, dia, inicio, fin});
+        save(LS_TEC_MANUAL, tecManual);
+        renderManualList(); renderGrid();
+      });
+    }
+  });
+
+  container.querySelectorAll(".tec-check").forEach(cb=>{
+    cb.addEventListener("change", ()=>{
+      tecProgress[cb.dataset.materia] = cb.checked;
+      save(LS_TEC_PROGRESS, tecProgress);
+      renderTecnicatura();
+    });
+  });
+}
+
+function renderManualList(){
+  const list = document.getElementById("manualList");
+  if(!list) return;
+  if(tecManual.length === 0){ list.innerHTML = `<span style="color:var(--muted)">Todavía no cargaste horarios manuales.</span>`; return; }
+  list.innerHTML = tecManual.map(item => `
+    <div class="item">
+      <span>${item.materia} — ${DAY_LABELS[item.dia]} ${item.inicio}:00–${item.fin}:00</span>
+      <button data-id="${item.id}">✕ quitar</button>
+    </div>`).join("");
+  list.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      tecManual = tecManual.filter(x=>x.id != btn.dataset.id);
+      save(LS_TEC_MANUAL, tecManual);
+      renderManualList(); renderGrid();
+    });
+  });
+}
+
+/* ============================================================
+   RENDER: Grilla semanal
+   ============================================================ */
+function collectBlocks(){
+  // returns array of {materia, carrera, dia, startHour, endHour, priority, meta}
+  const blocks = [];
+
+  // reconstruir el mismo esquema de keys que usa renderIngenieria para poder matchear
+  const keyToCom = {};
+  Object.entries(ING_CATALOG).forEach(([materia, comisiones])=>{
+    comisiones.forEach((com, idx)=>{
+      const key = materia + "||" + (com.div || ("turno-"+com.turno+"-"+idx));
+      keyToCom[key] = {materia, com};
+    });
+  });
+
+  Object.entries(ingSelection).forEach(([key, state])=>{
+    if(!state.checked) return;
+    const entry = keyToCom[key];
+    if(!entry) return;
+    const {materia, com} = entry;
+    Object.entries(com.dias).forEach(([dia, info])=>{
+      if(info.modulos.length === 0) return; // texto-only (ej sabados especiales) se omite del grid visual
+      const mods = info.modulos.slice().sort((a,b)=>a-b);
+      // agrupar módulos contiguos en un bloque
+      let start = mods[0], prev = mods[0];
+      for(let i=1;i<=mods.length;i++){
+        const cur = mods[i];
+        if(cur !== prev+1){
+          const startHour = moduloToHour(com.turno, start);
+          const endHour = moduloToHour(com.turno, prev) + 1;
+          blocks.push({materia, carrera:"ing", dia, startHour, endHour: endHour===0?24:endHour, priority: state.priority, meta: `${com.div||com.turno} · ${com.turno}`});
+          start = cur;
+        }
+        prev = cur;
+      }
+    });
+  });
+
+  tecManual.forEach(item=>{
+    blocks.push({materia:item.materia, carrera:"tec", dia:item.dia, startHour:item.inicio, endHour:item.fin, priority:false, meta:"manual"});
+  });
+
+  return blocks;
+}
+
+function renderGrid(){
+  const blocks = collectBlocks();
+  const table = document.getElementById("gridTable");
+  let html = "<thead><tr><th>Hora</th>" + DAYS.map(d=>`<th>${DAY_LABELS[d]}</th>`).join("") + "</tr></thead><tbody>";
+
+  for(let i=0;i<HOURS.length-1;i++){
+    const h = HOURS[i];
+    const hLabel = String(h).padStart(2,"0")+":00";
+    html += `<tr><td class="hourcell">${hLabel}</td>`;
+    DAYS.forEach(day=>{
+      const cellBlocks = blocks.filter(b=>{
+        if(b.dia !== day) return false;
+        // normalize: si endHour < startHour, cruza medianoche
+        const s = b.startHour, e = b.endHour <= b.startHour ? b.endHour+24 : b.endHour;
+        const hh = h < 7 ? h+24 : h;
+        return hh >= s && hh < e;
+      });
+      html += `<td class="slot">`;
+      cellBlocks.forEach(b=>{
+        html += `<div class="block ${b.carrera} ${b.priority?'priority':''}" title="${b.materia} (${b.meta})">
+          <span class="name">${b.materia}</span>${b.meta}
+        </div>`;
+      });
+      html += `</td>`;
+    });
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  table.innerHTML = html;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function renderAll(){
+  renderIngenieria();
+  renderTecnicatura();
+  renderGrid();
+}
+renderAll();
+</script>
+</body>
+</html>
